@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz de Jogadores de Futebol</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #008000, #90EE90);
+            color: #333;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .quiz-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 128, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            animation: slideIn 0.8s ease-out;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(-50px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h1 {
+            color: #FF8C00;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question {
+            font-size: 1.5em;
+            color: #008000;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .option {
+            background: linear-gradient(45deg, #FFA500, #FF8C00);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(255, 140, 0, 0.4);
+        }
+
+        .option.selected {
+            background: #008000;
+            box-shadow: 0 0 20px rgba(0, 128, 0, 0.5);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        button {
+            background: linear-gradient(45deg, #FF8C00, #FFA500);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px rgba(255, 140, 0, 0.4);
+        }
+
+        button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .score {
+            font-size: 2em;
+            color: #008000;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+
+        .results {
+            font-size: 1.3em;
+        }
+
+        .progress {
+            background: #ddd;
+            height: 10px;
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #FF8C00, #FFA500);
+            height: 100%;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .quiz-container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container" id="quizContainer">
+        <h1>🏆 Quiz de Jogadores de Futebol 🏆</h1>
+        
+        <div class="progress">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        
+        <div id="quiz" class="question-container">
+            <div class="question" id="question"></div>
+            <div class="options" id="options"></div>
+        </div>
+        
+        <div class="nav-buttons">
+            <button id="prevBtn" onclick="previousQuestion()" disabled>Anterior</button>
+            <button id="nextBtn" onclick="nextQuestion()">Próxima</button>
+            <button id="submitBtn" onclick="submitQuiz()" class="hidden">Finalizar Quiz</button>
+        </div>
+        
+        <div id="score" class="score hidden"></div>
+        <div id="results" class="results hidden"></div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "Quem é o maior artilheiro da história da Seleção Brasileira?",
+                options: ["Pelé", "Neymar", "Romário", "Ronaldo"],
+                answer: 0
+            },
+            {
+                question: "Quantas Bolas de Ouro Lionel Messi ganhou até 2023?",
+                options: ["6", "7", "8", "5"],
+                answer: 2
+            },
+            {
+                question: "Qual jogador detém o recorde de mais gols na Champions League?",
+                options: ["Cristiano Ronaldo", "Lionel Messi", "Robert Lewandowski", "Karim Benzema"],
+                answer: 0
+            },
+            {
+                question: "Quem ganhou a Copa do Mundo de 2018?",
+                options: ["França", "Brasil", "Alemanha", "Argentina"],
+                answer: 0
+            },
+            {
+                question: "Qual clube Cristiano Ronaldo representa atualmente (2024)?",
+                options: ["Manchester United", "Real Madrid", "Juventus", "Al-Nassr"],
+                answer: 3
+            },
+            {
+                question: "Quantos gols Pelé marcou oficialmente na carreira?",
+                options: ["757", "1.283", "892", "1.091"],
+                answer: 1
+            },
+            {
+                question: "Quem é conhecido como 'O Fenômeno'?",
+                options: ["Pelé", "Maradona", "Ronaldo Nazário", "Zidane"],
+                answer: 2
+            },
+            {
+                question: "Em que ano Messi ganhou sua primeira Bola de Ouro?",
+                options: ["2009", "2010", "2008", "2011"],
+                answer: 0
+            }
+        ];
+
+        let currentQuestion = 0;
+        let score = 0;
+        let answers = [];
+
+        function loadQuestion() {
+            const q = quizData[currentQuestion];
+            document.getElementById('question').textContent = q.question;
+            
+            const optionsEl = document.getElementById('options');
+            optionsEl.innerHTML = '';
+            
+            q.options.forEach((option, index) => {
+                const btn = document.createElement('button');
+                btn.className = 'option';
+                btn.textContent = option;
+                btn.onclick = () => selectOption(index);
+                optionsEl.appendChild(btn);
+            });
+            
+            updateProgress();
+            updateButtons();
+            
+            // Restore previous selection
+            if (answers[currentQuestion] !== undefined) {
+                document.querySelectorAll('.option')[answers[currentQuestion]].classList.add('selected');
+            }
+        }
+
+        function selectOption(index) {
+            answers[currentQuestion] = index;
+            document.querySelectorAll('.option').forEach((opt, i) => {
+                opt.classList.toggle('selected', i === index);
+            });
+        }
+
+        function nextQuestion() {
+            if (answers[currentQuestion] === undefined) return;
+            
+            if (answers[currentQuestion] === quizData[currentQuestion].answer) {
+                score++;
+            }
+            
+            currentQuestion++;
+            if (currentQuestion < quizData.length) {
+                loadQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                if (answers[currentQuestion] === quizData[currentQuestion].answer) {
+                    score--; // Undo if going back
+                }
+                currentQuestion--;
+                loadQuestion();
+            }
+        }
+
+        function updateButtons() {
+            document.getElementById('prevBtn').disabled = currentQuestion === 0;
+            document.getElementById('nextBtn').style.display = currentQuestion === quizData.length - 1 ? 'none' : 'inline-block';
+            document.getElementById('submitBtn').classList.toggle('hidden', currentQuestion !== quizData.length - 1);
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / quizData.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function showResults() {
+            document.getElementById('quiz').classList.add('hidden');
+            document.getElementById('score').textContent = `Sua pontuação: ${score}/${quizData.length}`;
+            document.getElementById('score').classList.remove('hidden');
+            
+            const percentage = Math.round((score / quizData.length) * 100);
+            let message = '';
+            if (percentage >= 80) message = '🏆 Excelente! Você é um verdadeiro fã de futebol!';
+            else if (percentage >= 60) message = '⚽ Bom trabalho! Continua estudando!';
+            else message = '📚 Pratique mais sobre jogadores de futebol!';
+            
+            document.getElementById('results').innerHTML = `<p>${message}</p><p>${percentage}% correto!</p>
+                <br><button onclick="restartQuiz()">Refazer Quiz</button>`;
+            document.getElementById('results').classList.remove('hidden');
+            
+            document.querySelector('.nav-buttons').style.display = 'none';
+        }
+
+        function submitQuiz() {
+            nextQuestion();
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            score = 0;
+            answers = [];
+            document.getElementById('quiz').classList.remove('hidden');
+            document.getElementById('score').classList.add('hidden');
+            document.getElementById('results').classList.add('hidden');
+            document.querySelector('.nav-buttons').style.display = 'flex';
+            loadQuestion();
+        }
+
+        // Start quiz
+        loadQuestion();
+    </script>
+</body>
+</html>
